@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<title>Claude Usage</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #faf9f5; --fg: #1f1e1d; --muted: #6b6a68; --faint: #9a9893;
+    --track: #e8e6dc; --line: #e8e6dc; --grid: #ecebe4;
+    --accent: #c96442; --warn: #e8912d; --crit: #e5484d;
+    --c1: #2a78d6; --c2: #eb6834; --c3: #1baf7a; --c4: #eda100;
+    --c5: #e87ba4; --c6: #008300; --c7: #4a3aa7; --c8: #e34948; --c9: #9a9893;
+    --tip-bg: #ffffff; --tip-shadow: 0 4px 16px rgba(0,0,0,.14);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --bg: #1f1e1d; --fg: #f5f4ef; --muted: #a3a19b; --faint: #7a7873;
+      --track: #3a3937; --line: #34332f; --grid: #2e2d2a;
+      --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500;
+      --c5: #d55181; --c6: #008300; --c7: #9085e9; --c8: #e66767; --c9: #7a7873;
+      --tip-bg: #2b2a28; --tip-shadow: 0 4px 16px rgba(0,0,0,.5);
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; width: 360px; background: var(--bg); color: var(--fg);
+         font: 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px 6px; }
+  h1 { font-size: 14px; margin: 0; font-weight: 600; }
+  h2 { font-size: 12px; margin: 0 0 8px; font-weight: 600; color: var(--muted); }
+  button.icon { all: unset; cursor: pointer; color: var(--muted); font-size: 16px; line-height: 1;
+                padding: 4px; border-radius: 6px; }
+  button.icon:hover { color: var(--fg); background: var(--track); }
+  button.icon.spin { animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  main { padding: 0 16px 4px; }
+  section { padding: 10px 0 12px; }
+  section + section { border-top: 1px solid var(--line); }
+
+  .hero { font-size: 22px; font-weight: 600; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+  .hero small { font-size: 13px; font-weight: 400; color: var(--muted); letter-spacing: 0; }
+  .row { margin-bottom: 12px; }
+  .row:last-child { margin-bottom: 0; }
+  .top { display: flex; justify-content: space-between; align-items: baseline; }
+  .top strong { font-variant-numeric: tabular-nums; }
+  .track { height: 6px; margin: 6px 0 4px; border-radius: 3px; background: var(--track); overflow: hidden; }
+  .bar { height: 100%; border-radius: 3px; background: var(--accent); }
+  .bar.warn { background: var(--warn); } .bar.crit { background: var(--crit); }
+  .sub { font-size: 11px; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
+  .msg { padding: 8px 0 14px; color: var(--muted); }
+  .msg a { color: var(--accent); }
+
+  .chart { position: relative; }
+  .chart svg { display: block; overflow: visible; }
+  .chart text { font: 10px system-ui, sans-serif; fill: var(--faint); font-variant-numeric: tabular-nums; }
+  .chart .grid { stroke: var(--grid); stroke-width: 1; }
+  .chart .base { stroke: var(--line); stroke-width: 1; }
+  .chart .col { fill: transparent; }
+  .chart .col.hover { fill: var(--track); opacity: .5; }
+  .s1 { fill: var(--c1); background: var(--c1); } .s2 { fill: var(--c2); background: var(--c2); }
+  .s3 { fill: var(--c3); background: var(--c3); } .s4 { fill: var(--c4); background: var(--c4); }
+  .s5 { fill: var(--c5); background: var(--c5); } .s6 { fill: var(--c6); background: var(--c6); }
+  .s7 { fill: var(--c7); background: var(--c7); } .s8 { fill: var(--c8); background: var(--c8); }
+  .s9 { fill: var(--c9); background: var(--c9); }
+
+  .tip { position: absolute; pointer-events: none; min-width: 150px; padding: 8px 10px; border-radius: 8px;
+         background: var(--tip-bg); box-shadow: var(--tip-shadow); font-size: 11px; display: none; z-index: 2; }
+  .tip .t { font-weight: 600; margin-bottom: 4px; display: flex; justify-content: space-between; gap: 12px; }
+  .tip .r, .legend .r { display: flex; align-items: center; gap: 6px; }
+  .tip .r span:last-child, .legend .r span:last-child { margin-left: auto; font-variant-numeric: tabular-nums; }
+  .sw { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+
+  .legend { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; margin-top: 10px; font-size: 12px; }
+  .legend .r span:last-child { color: var(--muted); }
+
+  footer { display: flex; justify-content: space-between; align-items: center; gap: 8px;
+           padding: 10px 16px 12px; border-top: 1px solid var(--line); font-size: 11px; color: var(--muted); }
+  footer a, footer button.link { all: unset; cursor: pointer; color: var(--muted); text-decoration: underline; }
+  footer a:hover, footer button.link:hover { color: var(--fg); }
+  footer .links { display: flex; gap: 12px; }
+  select { font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line);
+           border-radius: 6px; padding: 2px 4px; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Claude Usage</h1>
+    <button class="icon" id="refresh" title="Uppdatera" aria-label="Uppdatera">↻</button>
+  </header>
+  <main id="content"><div class="msg">Hämtar…</div></main>
+  <footer>
+    <label id="badgeWrap">Ikonen visar <select id="badgeSource"></select></label>
+    <div class="links">
+      <button class="link" id="copyRaw" title="Kopiera rådata till urklipp för felsökning">Rådata</button>
+      <a href="https://claude.ai/new#settings/usage" target="_blank">Öppna på claude.ai</a>
+    </div>
+  </footer>
+  <script src="popup.js"></script>
+</body>
+</html>
